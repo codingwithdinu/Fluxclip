@@ -16,8 +16,10 @@ Fluxclip is an all-in-one media utility starter built with Next.js and TypeScrip
 1. Install Node.js 20.9+.
 2. Install dependencies: `npm install`
 3. Copy `.env.example` to `.env.local` if you want to use the optional API integrations.
-4. Start development: `npm run dev`
-5. Open http://localhost:3000
+4. Run URL validation tests: `npm test`
+5. Check lint: `npm run lint`
+6. Start development: `npm run dev`
+7. Open http://localhost:3000
 
 ## Environment variables
 
@@ -36,6 +38,7 @@ Without the YouTube key, Fluxclip can still validate YouTube links and show the 
 - Optional Redis-backed sliding-window rate limit of 20 requests per IP per 60 seconds
 - Instagram link guidance with a direct link back to the original post/Reel (no scraping or private-content bypass)
 - User-friendly API errors for malformed requests, upstream failures, quota issues, and timeouts
+- Automated tests for supported URL formats, canonicalization, and invalid input
 - Responsive interface and loading/error states
 
 This starter does **not** scrape platforms or bypass access controls. Platform download policies and copyright permissions must be respected. For user-owned media, add a documented authorized export/upload workflow before enabling downloads.
