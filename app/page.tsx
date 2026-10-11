@@ -44,49 +44,6 @@ export default function HomePage() {
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [downloadName, setDownloadName] = useState("");
-  const [fileMessage, setFileMessage] = useState("");
-
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0] ?? null;
-    setFileMessage("");
-    if (file && file.size > 500 * 1024 * 1024) {
-      setSelectedFile(null);
-      setDownloadName("");
-      setFileMessage("Please choose a file smaller than 500 MB.");
-      event.target.value = "";
-      return;
-    }
-    if (file && !/^(video|audio|image)\//i.test(file.type)) {
-      setSelectedFile(null);
-      setDownloadName("");
-      setFileMessage("Choose a video, audio, or image file.");
-      event.target.value = "";
-      return;
-    }
-    setSelectedFile(file);
-    setDownloadName(file?.name ?? "");
-  }
-
-  function downloadSelectedFile() {
-    if (!selectedFile) return;
-    const safeName = downloadName.trim().replace(/[\\/:*?\"<>|]/g, "-");
-    if (!safeName) {
-      setFileMessage("Enter a filename before downloading.");
-      return;
-    }
-    const objectUrl = URL.createObjectURL(selectedFile);
-    const anchor = document.createElement("a");
-    anchor.href = objectUrl;
-    anchor.download = safeName;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    setFileMessage("Download started. Your file never left this device.");
-  }
-
   async function handleAnalyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setResult(null);
