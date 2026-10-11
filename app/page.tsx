@@ -267,13 +267,17 @@ export default function HomePage() {
         <div className="faq-list">
           <details><summary>Can Fluxclip download any public video? <ChevronDown size={17} /></summary><p>Not automatically. A public link does not guarantee that a platform provides a permitted direct-download URL. Fluxclip currently validates links and offers supported previews; downloads need an authorized file source.</p></details>
           <details><summary>Why is a YouTube API key optional? <ChevronDown size={17} /></summary><p>Without a key, Fluxclip can validate a video link and show its standard thumbnail and official embed. A server-side YouTube Data API key adds title, channel, and duration details.</p></details>
-          <details><summary>Does Fluxclip store my links? <ChevronDown size={17} /></summary><p>The starter API does not save submitted URLs to a database. Production deployments should still add a privacy policy and monitoring that avoids logging sensitive user input.</p></details>
+          <details><summary>Does Fluxclip store my links? <ChevronDown size={17} /></summary><p>Fluxclip does not save submitted full URLs in a user history. Successful YouTube metadata may be cached for six hours, and configured rate limiting processes request IP addresses. Hosting providers may retain technical logs. Read our <a href="/privacy">Privacy Policy</a> for details.</p></details>
         </div>
       </section>
 
       <footer className="footer">
         <Link className="brand footer-brand" href="/"><span className="brand-mark"><Clapperboard size={19} /></span><span>flux<span className="brand-accent">clip</span></span></Link>
         <p>Your media. One simple place.</p>
+        <div className="footer-legal-links">
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+        </div>
         <span className="footer-note">Independent utility · Not affiliated with Instagram or YouTube</span>
       </footer>
     </main>
