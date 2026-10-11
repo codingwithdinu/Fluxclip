@@ -44,6 +44,10 @@ export default function HomePage() {
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaFilename, setMediaFilename] = useState("my-video.mp4");
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
   async function handleAnalyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setResult(null);
@@ -70,6 +74,43 @@ export default function HomePage() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function downloadAuthorizedMedia(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setDownloadError("");
+    let parsed: URL;
+    try {
+      parsed = new URL(mediaUrl.trim());
+      if (parsed.protocol !== "https:") throw new Error("Use HTTPS.");
+    } catch {
+      setDownloadError("Enter a valid direct HTTPS media-file URL from an authorized source.");
+      return;
+    }
+    setDownloading(true);
+    try {
+      const params = new URLSearchParams({ url: parsed.toString(), filename: mediaFilename.trim() || "fluxclip-media" });
+      const response = await fetch(`/api/download?${params.toString()}`, { cache: "no-store" });
+      if (!response.ok) {
+        let message = "Download failed. Check the media URL and worker configuration.";
+        try { const data = (await response.json()) as { error?: string }; if (data.error) message = data.error; } catch { /* use fallback */ }
+        setDownloadError(message);
+        return;
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = mediaFilename.trim() || "fluxclip-media";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      setDownloadError("Could not reach the download service. Please try again.");
+    } finally {
+      setDownloading(false);
     }
   }
 
@@ -239,6 +280,28 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="how-section" id="authorized-download" aria-labelledby="authorized-download-title">
+        <div className="section-heading">
+          <span className="section-label">AUTHORIZED MEDIA</span>
+          <h2 id="authorized-download-title">Download a direct media file.</h2>
+          <p>Use a direct HTTPS file URL hosted on a server you own or are authorized to access. Social post links are not direct media URLs.</p>
+        </div>
+        <form className="product-card authorized-download-card" onSubmit={downloadAuthorizedMedia}>
+          <label className="input-label" htmlFor="direct-media-url">Direct media file URL</label>
+          <div className="url-input-wrap">
+            <Link2 className="url-input-icon" size={18} />
+            <input id="direct-media-url" type="url" inputMode="url" placeholder="https://media.yourdomain.com/video.mp4" value={mediaUrl} onChange={(event) => { setMediaUrl(event.target.value); setDownloadError(""); }} required maxLength={4096} />
+          </div>
+          <label className="input-label" htmlFor="media-filename">Save as (optional)</label>
+          <input id="media-filename" className="filename-input" value={mediaFilename} onChange={(event) => setMediaFilename(event.target.value)} maxLength={140} placeholder="my-video.mp4" />
+          <p className="input-help">The source host must be configured in the worker&apos;s ALLOWED_MEDIA_HOSTS. Only download media you own or have permission to save.</p>
+          <button className="analyze-button" type="submit" disabled={downloading || !mediaUrl.trim()}>
+            {downloading ? <><LoaderCircle className="spin" size={18} /> Preparing download...</> : <>Download authorized file <ArrowDownToLine size={17} /></>}
+          </button>
+          {downloadError && <p className="download-error" role="alert">{downloadError}</p>}
+        </form>
+      </section>
+
       <section className="trust-strip" aria-label="Product benefits">
         <div><ShieldCheck size={20} /><span><strong>Privacy first</strong><small>No passwords requested</small></span></div>
         <div><Clock3 size={20} /><span><strong>Quick link checks</strong><small>Clear feedback, no guesswork</small></span></div>
@@ -264,7 +327,7 @@ export default function HomePage() {
           <h2>Questions, answered.</h2>
         </div>
         <div className="faq-list">
-          <details><summary>Can Fluxclip download any public video? <ChevronDown size={17} /></summary><p>Not automatically. A public link does not guarantee that a platform provides a permitted direct-download URL. Fluxclip currently validates links and offers supported previews; downloads need an authorized file source.</p></details>
+          <details><summary>Can Fluxclip download any public video? <ChevronDown size={17} /></summary><p>No. The link analyzer provides supported previews. The direct-download tool accepts authorized direct media-file URLs from hosts configured on the worker; it does not extract files from YouTube or Instagram page links.</p></details>
           <details><summary>Why is a YouTube API key optional? <ChevronDown size={17} /></summary><p>Without a key, Fluxclip can validate a video link and show its standard thumbnail and official embed. A server-side YouTube Data API key adds title, channel, and duration details.</p></details>
           <details><summary>Does Fluxclip store my links? <ChevronDown size={17} /></summary><p>Fluxclip does not save submitted full URLs in a user history. Successful YouTube metadata may be cached for six hours, and configured rate limiting processes request IP addresses. Hosting providers may retain technical logs. Read our <a href="/privacy">Privacy Policy</a> for details.</p></details>
         </div>
