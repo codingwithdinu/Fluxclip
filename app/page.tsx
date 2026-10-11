@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -99,10 +101,10 @@ export default function HomePage() {
   return (
     <main className="site-shell">
       <nav className="topbar">
-        <a className="brand" href="/" aria-label="Fluxclip home">
+        <Link className="brand" href="/" aria-label="Fluxclip home">
           <span className="brand-mark"><Clapperboard size={22} strokeWidth={2.2} /></span>
           <span>flux<span className="brand-accent">clip</span></span>
-        </a>
+        </Link>
         <div className="nav-links">
           <a href="#how-it-works">How it works</a>
           <a href="#faq">FAQ</a>
@@ -189,7 +191,7 @@ export default function HomePage() {
                   <div className="result-heading"><span className="result-check"><Check size={15} /></span><div><strong>Link analyzed</strong><span>{result.platform === "youtube" ? "YouTube video" : "Instagram post or Reel"}</span></div></div>
                   {result.thumbnail && (
                     <div className="preview-card">
-                      <img src={result.thumbnail} alt="Video thumbnail" />
+                      <Image src={result.thumbnail} alt="Video thumbnail" width={640} height={360} unoptimized />
                       <div className="preview-overlay"><Play size={20} fill="currentColor" /></div>
                     </div>
                   )}
@@ -200,7 +202,7 @@ export default function HomePage() {
                   <button type="button" className="copy-link-button" onClick={copyLink}>{copied ? <Check size={15} /> : <Clipboard size={15} />}{copied ? "Link copied" : "Copy clean link"}</button>
                 </>
               ) : (
-                <div className="error-row"><CircleHelp size={19} /><div><strong>We couldn't analyze that link</strong><p>{result.error}</p></div></div>
+                <div className="error-row"><CircleHelp size={19} /><div><strong>We could not analyze that link</strong><p>{result.error}</p></div></div>
               )}
             </div>
           )}
@@ -241,7 +243,7 @@ export default function HomePage() {
       </section>
 
       <footer className="footer">
-        <a className="brand footer-brand" href="/"><span className="brand-mark"><Clapperboard size={19} /></span><span>flux<span className="brand-accent">clip</span></span></a>
+        <Link className="brand footer-brand" href="/"><span className="brand-mark"><Clapperboard size={19} /></span><span>flux<span className="brand-accent">clip</span></span></Link>
         <p>Your media. One simple place.</p>
         <span className="footer-note">Independent utility · Not affiliated with Instagram or YouTube</span>
       </footer>
