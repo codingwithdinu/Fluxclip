@@ -254,7 +254,7 @@ export default function HomePage() {
 }
 
 function formatDuration(value: string) {
-  const match = value.match(/^PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?$/);
+  const match = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
   if (!match) return value;
   const hours = Number(match[1] ?? 0);
   const minutes = Number(match[2] ?? 0);
