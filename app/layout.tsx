@@ -6,7 +6,6 @@ export const metadata: Metadata = {
   description:
     "A clean, simple place to preview supported social videos and manage media you own or are authorized to download.",
   applicationName: "Fluxclip",
-  metadataBase: new URL("https://fluxclip.example"),
   openGraph: {
     title: "Fluxclip",
     description: "Your media. One simple place.",
