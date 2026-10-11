@@ -190,16 +190,37 @@ export default function HomePage() {
               {result.success ? (
                 <>
                   <div className="result-heading"><span className="result-check"><Check size={15} /></span><div><strong>Link analyzed</strong><span>{result.platform === "youtube" ? "YouTube video" : "Instagram post or Reel"}</span></div></div>
-                  {result.thumbnail && (
+                  {result.platform === "instagram" && result.embedUrl ? (
+                    <div className="instagram-embed-wrap">
+                      <iframe
+                        className="instagram-embed"
+                        src={result.embedUrl}
+                        title="Instagram post or Reel preview"
+                        loading="lazy"
+                        allow="encrypted-media; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
+                      />
+                    </div>
+                  ) : result.thumbnail ? (
                     <div className="preview-card">
                       <Image src={result.thumbnail} alt="Video thumbnail" width={640} height={360} unoptimized />
                       <div className="preview-overlay"><Play size={20} fill="currentColor" /></div>
                     </div>
-                  )}
+                  ) : null}
                   <div className="result-title">{result.title ?? "Instagram link detected"}</div>
                   {result.channelTitle && <div className="result-channel">{result.channelTitle}</div>}
                   {result.duration && <div className="result-channel">Duration: {formatDuration(result.duration)}</div>}
-                  {(result.embedUrl || result.previewUrl) && <a className="preview-link" href={result.embedUrl ?? result.previewUrl} target="_blank" rel="noreferrer">{result.embedUrl ? "Open official video preview" : "Open on Instagram"} <ArrowRight size={14} /></a>}
+                  {(result.platform === "instagram" ? result.url : result.embedUrl ?? result.previewUrl) && (
+                    <a
+                      className="preview-link"
+                      href={result.platform === "instagram" ? result.url : result.embedUrl ?? result.previewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {result.platform === "instagram" ? "Open on Instagram" : "Open official video preview"} <ArrowRight size={14} />
+                    </a>
+                  )}
                   <p className="result-message">{result.message}</p>
                   <button type="button" className="copy-link-button" onClick={copyLink}>{copied ? <Check size={15} /> : <Clipboard size={15} />}{copied ? "Link copied" : "Copy clean link"}</button>
                 </>
