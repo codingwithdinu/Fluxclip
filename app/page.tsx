@@ -189,9 +189,14 @@ export default function HomePage() {
             <div className={`result-panel ${result.success ? "result-success" : "result-error"}`} aria-live="polite">
               {result.success ? (
                 <>
-                  <div className="result-heading"><span className="result-check"><Check size={15} /></span><div><strong>Link analyzed</strong><span>{result.platform === "youtube" ? "YouTube video" : "Instagram post or Reel"}</span></div></div>
+                  <div className="result-heading"><span className="result-check"><Check size={15} /></span><div><strong>Link analyzed</strong><span>{result.platform === "youtube" ? "YouTube video" : getInstagramContentType(result.url)}</span></div></div>
                   {result.platform === "instagram" && result.embedUrl ? (
-                    <div className="instagram-embed-wrap">
+                    <>
+                      <div className="instagram-preview-note">
+                        <span>Preview for public posts when embedding is available.</span>
+                        {result.url && <a href={result.url} target="_blank" rel="noopener noreferrer">Open on Instagram <ArrowRight size={13} /></a>}
+                      </div>
+                      <div className="instagram-embed-wrap">
                       <iframe
                         className="instagram-embed"
                         src={result.embedUrl}
@@ -201,7 +206,8 @@ export default function HomePage() {
                         allowFullScreen
                         referrerPolicy="strict-origin-when-cross-origin"
                       />
-                    </div>
+                      </div>
+                    </>
                   ) : result.thumbnail ? (
                     <div className="preview-card">
                       <Image src={result.thumbnail} alt="Video thumbnail" width={640} height={360} unoptimized />
@@ -211,14 +217,14 @@ export default function HomePage() {
                   <div className="result-title">{result.title ?? "Instagram link detected"}</div>
                   {result.channelTitle && <div className="result-channel">{result.channelTitle}</div>}
                   {result.duration && <div className="result-channel">Duration: {formatDuration(result.duration)}</div>}
-                  {(result.platform === "instagram" ? result.url : result.embedUrl ?? result.previewUrl) && (
+                  {result.platform !== "instagram" && (result.embedUrl ?? result.previewUrl) && (
                     <a
                       className="preview-link"
-                      href={result.platform === "instagram" ? result.url : result.embedUrl ?? result.previewUrl}
+                      href={result.embedUrl ?? result.previewUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {result.platform === "instagram" ? "Open on Instagram" : "Open official video preview"} <ArrowRight size={14} />
+                      Open official video preview <ArrowRight size={14} />
                     </a>
                   )}
                   <p className="result-message">{result.message}</p>
@@ -272,6 +278,11 @@ export default function HomePage() {
       </footer>
     </main>
   );
+}
+
+function getInstagramContentType(value?: string) {
+  if (!value) return "Instagram post or Reel";
+  return /\/(reel|reels|tv)\//i.test(value) ? "Instagram Reel" : "Instagram post";
 }
 
 function formatDuration(value: string) {
