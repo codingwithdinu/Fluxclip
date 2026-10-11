@@ -142,9 +142,10 @@ export async function POST(request: NextRequest) {
         platform: "instagram",
         url: analyzed.canonicalUrl,
         previewUrl: analyzed.canonicalUrl,
+        embedUrl: `${analyzed.canonicalUrl.replace(/\/$/, "")}/embed/`,
         downloadAvailable: false,
         message:
-          "Instagram preview and download access depends on the account, permissions, and supported Meta integrations. Fluxclip does not bypass private access or scrape media.",
+          "If the public post supports embedding, its official Instagram preview appears below. Private, removed, age-restricted, or embed-disabled posts may not display. Fluxclip does not scrape media or bypass access controls.",
       },
       { headers: { "Cache-Control": "no-store" } },
     );
