@@ -171,6 +171,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visibl
   .hero-points { align-items: center; font-size: 10px; margin-top: 22px; }
   .product-card { width: 100%; max-width: 490px; margin: 0 auto; padding: 22px 18px; }
   .instagram-embed { height: 440px; min-height: 0; }
+  .instagram-preview-note { align-items: flex-start; flex-direction: column; gap: 7px; }
   .trust-strip { width: calc(100% - 36px); grid-template-columns: 1fr; padding: 10px 0; }
   .trust-strip > div { justify-content: flex-start; padding: 14px 9px; }
   .trust-strip > div + div { border-left: 0; border-top: 1px solid var(--line); }
