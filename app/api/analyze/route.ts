@@ -43,12 +43,12 @@ const rateLimiter = redis
   : null;
 
 function jsonError(error: string, status: number, headers?: HeadersInit) {
+  const responseHeaders = new Headers(headers);
+  responseHeaders.set("Cache-Control", "no-store");
+
   return NextResponse.json(
     { success: false, error },
-    {
-      status,
-      headers: { "Cache-Control": "no-store", ...headers },
-    },
+    { status, headers: responseHeaders },
   );
 }
 
