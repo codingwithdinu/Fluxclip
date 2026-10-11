@@ -19,25 +19,46 @@ type YouTubeVideoResponse = {
   }>;
 };
 
+function jsonError(error: string, status: number) {
+  return NextResponse.json(
+    { success: false, error },
+    { status, headers: { "Cache-Control": "no-store" } },
+  );
+}
+
 export async function POST(request: NextRequest) {
+  let body: unknown;
+
   try {
-    const body: unknown = await request.json();
-    if (
-      !body ||
-      typeof body !== "object" ||
-      !("url" in body) ||
-      typeof body.url !== "string"
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Please provide a video URL." },
-        { status: 400 },
-      );
-    }
+    body = await request.json();
+  } catch {
+    return jsonError("Request body must be valid JSON.", 400);
+  }
 
-    const analyzed = analyzeSupportedUrl(body.url);
+  if (
+    !body ||
+    typeof body !== "object" ||
+    !("url" in body) ||
+    typeof body.url !== "string" ||
+    !body.url.trim()
+  ) {
+    return jsonError("Please provide a video URL.", 400);
+  }
 
-    if (analyzed.platform === "instagram") {
-      return NextResponse.json({
+  let analyzed: ReturnType<typeof analyzeSupportedUrl>;
+
+  try {
+    analyzed = analyzeSupportedUrl(body.url);
+  } catch (error) {
+    return jsonError(
+      error instanceof Error ? error.message : "Please enter a valid video URL.",
+      400,
+    );
+  }
+
+  if (analyzed.platform === "instagram") {
+    return NextResponse.json(
+      {
         success: true,
         platform: "instagram",
         url: analyzed.canonicalUrl,
@@ -45,14 +66,21 @@ export async function POST(request: NextRequest) {
         downloadAvailable: false,
         message:
           "Instagram preview and download access depends on the account, permissions, and supported Meta integrations. Fluxclip does not bypass private access or scrape media.",
-      });
-    }
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
 
-    const videoId = analyzed.videoId!;
-    const apiKey = process.env.YOUTUBE_API_KEY;
+  const videoId = analyzed.videoId;
+  if (!videoId) {
+    return jsonError("We couldn't find a video ID in that YouTube link.", 400);
+  }
 
-    if (!apiKey) {
-      return NextResponse.json({
+  const apiKey = process.env.YOUTUBE_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      {
         success: true,
         platform: "youtube",
         videoId,
@@ -64,43 +92,63 @@ export async function POST(request: NextRequest) {
         metadataSource: "youtube-thumbnail",
         message:
           "Preview is ready. Add YOUTUBE_API_KEY to fetch video metadata. YouTube's Data API does not provide a general MP4 download URL.",
-      });
-    }
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
 
-    const apiUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
-    apiUrl.searchParams.set("part", "snippet,contentDetails");
-    apiUrl.searchParams.set("id", videoId);
-    apiUrl.searchParams.set("key", apiKey);
+  const apiUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
+  apiUrl.searchParams.set("part", "snippet,contentDetails");
+  apiUrl.searchParams.set("id", videoId);
+  apiUrl.searchParams.set("key", apiKey);
 
-    const upstream = await fetch(apiUrl, {
+  let upstream: Response;
+  try {
+    upstream = await fetch(apiUrl, {
       signal: AbortSignal.timeout(7000),
       cache: "no-store",
     });
+  } catch (error) {
+    const timedOut =
+      error instanceof Error &&
+      (error.name === "TimeoutError" || error.name === "AbortError");
 
-    if (!upstream.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            upstream.status === 403
-              ? "YouTube API quota or permissions issue. Check your API key and quota."
-              : "YouTube couldn't provide details right now. Please try again later.",
-        },
-        { status: 502 },
+    return jsonError(
+      timedOut
+        ? "YouTube took too long to respond. Please try again."
+        : "Couldn't connect to YouTube right now. Please try again later.",
+      timedOut ? 504 : 502,
+    );
+  }
+
+  if (!upstream.ok) {
+    if (upstream.status === 403 || upstream.status === 429) {
+      return jsonError(
+        "YouTube API quota or permissions issue. Check the API key, enabled API, and quota in Google Cloud.",
+        503,
       );
     }
+    return jsonError(
+      "YouTube couldn't provide details right now. Please try again later.",
+      502,
+    );
+  }
 
-    const data = (await upstream.json()) as YouTubeVideoResponse;
-    const item = data.items?.[0];
+  let data: YouTubeVideoResponse;
+  try {
+    data = (await upstream.json()) as YouTubeVideoResponse;
+  } catch {
+    return jsonError("YouTube returned an unexpected response. Please try again.", 502);
+  }
 
-    if (!item) {
-      return NextResponse.json(
-        { success: false, error: "This video may be unavailable or removed." },
-        { status: 404 },
-      );
-    }
+  const item = data.items?.[0];
 
-    return NextResponse.json({
+  if (!item) {
+    return jsonError("This video may be unavailable or removed.", 404);
+  }
+
+  return NextResponse.json(
+    {
       success: true,
       platform: "youtube",
       videoId,
@@ -117,13 +165,7 @@ export async function POST(request: NextRequest) {
       downloadAvailable: false,
       message:
         "Preview is ready. Downloading directly from YouTube is not provided by the Data API.",
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Something went wrong.";
-    return NextResponse.json(
-      { success: false, error: message },
-      { status: 400 },
-    );
-  }
+    },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
