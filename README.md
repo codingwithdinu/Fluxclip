@@ -29,8 +29,10 @@ Without this key, Fluxclip can still validate YouTube links and show the officia
 
 - Instagram and YouTube URL validation
 - Platform detection and clear error messages
-- Official YouTube embed preview
-- Instagram link guidance (no scraping or private-content bypass)
+- Official YouTube embed preview and thumbnail fallback
+- Optional YouTube title, channel, and duration metadata through the server-side Data API key
+- Instagram link guidance with a direct link back to the original post/Reel (no scraping or private-content bypass)
+- User-friendly API errors for malformed requests, upstream failures, quota issues, and timeouts
 - Responsive interface and loading/error states
 
 This starter does **not** scrape platforms or bypass access controls. Platform download policies and copyright permissions must be respected. For user-owned media, add a documented authorized export/upload workflow before enabling downloads.
