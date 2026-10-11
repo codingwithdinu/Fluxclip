@@ -9,6 +9,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@upstash/ratelimit": "^2.0.6",
+    "@upstash/redis": "^1.35.3",
     "next": "15.5.27",
     "react": "19.1.7",
     "react-dom": "19.1.7",
