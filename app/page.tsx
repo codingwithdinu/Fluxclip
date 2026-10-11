@@ -32,6 +32,7 @@ type AnalyzeResult = {
   duration?: string;
   thumbnail?: string;
   embedUrl?: string;
+  previewUrl?: string;
   downloadAvailable?: boolean;
   message?: string;
   error?: string;
@@ -197,7 +198,8 @@ export default function HomePage() {
                   )}
                   <div className="result-title">{result.title ?? "Instagram link detected"}</div>
                   {result.channelTitle && <div className="result-channel">{result.channelTitle}</div>}
-                  {result.embedUrl && <a className="preview-link" href={result.embedUrl} target="_blank" rel="noreferrer">Open official video preview <ArrowRight size={14} /></a>}
+                  {result.duration && <div className="result-channel">Duration: {formatDuration(result.duration)}</div>}
+                  {(result.embedUrl || result.previewUrl) && <a className="preview-link" href={result.embedUrl ?? result.previewUrl} target="_blank" rel="noreferrer">{result.embedUrl ? "Open official video preview" : "Open on Instagram"} <ArrowRight size={14} /></a>}
                   <p className="result-message">{result.message}</p>
                   <button type="button" className="copy-link-button" onClick={copyLink}>{copied ? <Check size={15} /> : <Clipboard size={15} />}{copied ? "Link copied" : "Copy clean link"}</button>
                 </>
@@ -249,6 +251,17 @@ export default function HomePage() {
       </footer>
     </main>
   );
+}
+
+function formatDuration(value: string) {
+  const match = value.match(/^PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?$/);
+  if (!match) return value;
+  const hours = Number(match[1] ?? 0);
+  const minutes = Number(match[2] ?? 0);
+  const seconds = Number(match[3] ?? 0);
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+    : `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 function ZapIcon() {
