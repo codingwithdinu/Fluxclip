@@ -90,25 +90,21 @@ export default function HomePage() {
     }
     setDownloading(true);
     try {
-      const params = new URLSearchParams({ url: parsed.toString(), filename: mediaFilename.trim() || "fluxclip-media" });
-      const response = await fetch(`/api/download?${params.toString()}`, { cache: "no-store" });
-      if (!response.ok) {
-        let message = "Download failed. Check the media URL and worker configuration.";
-        try { const data = (await response.json()) as { error?: string }; if (data.error) message = data.error; } catch { /* use fallback */ }
-        setDownloadError(message);
-        return;
-      }
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
+      // Navigate directly to the streaming download endpoint instead of buffering
+      // the entire video into a Blob. This is more memory-efficient for large files.
+      const params = new URLSearchParams({
+        url: parsed.toString(),
+        filename: mediaFilename.trim() || "fluxclip-media",
+      });
       const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = mediaFilename.trim() || "fluxclip-media";
+      anchor.href = `/api/download?${params.toString()}`;
+      anchor.rel = "noopener";
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
-      URL.revokeObjectURL(objectUrl);
+      // The browser handles the attachment stream; this UI cannot observe its completion.
     } catch {
-      setDownloadError("Could not reach the download service. Please try again.");
+      setDownloadError("Could not start the download. Please try again.");
     } finally {
       setDownloading(false);
     }
