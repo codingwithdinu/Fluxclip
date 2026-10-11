@@ -44,7 +44,7 @@ Without the YouTube key, Fluxclip can still validate YouTube links and show the 
 
 This starter does **not** scrape platforms or bypass access controls. Platform download policies and copyright permissions must be respected. For user-owned media, add a documented authorized export/upload workflow before enabling downloads.
 
-## Project structure
+## Separate media worker (authorized direct files only)\n\nA standalone Node.js streaming worker lives in `worker/` and can be deployed as a Docker web service. It requires a bearer token and exact allowlisted HTTPS media hosts, rejects redirects and non-media responses, and enforces a maximum download size. See [`worker/README.md`](worker/README.md) for configuration. **This worker does not extract YouTube/Instagram page URLs into media files.** The existing platform analyzer has no permitted direct-media URL source yet, so actual downloads from social permalinks remain unimplemented until an authorized provider integration is added.\n\n## Project structure
 
 ```
 app/
