@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useState } from "react";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -279,29 +279,6 @@ export default function HomePage() {
           )}
 
           <div className="card-footnote"><LockKeyhole size={13} /> Fluxclip never asks for your social account password.</div>
-        </div>
-      </section>
-
-      <section className="local-download-section" id="save-media" aria-labelledby="save-media-title">
-        <div className="local-download-card">
-          <div className="local-download-icon"><ArrowDownToLine size={23} /></div>
-          <div className="local-download-copy">
-            <span className="section-label">AUTHORIZED FILES</span>
-            <h2 id="save-media-title">Save a media file you already have</h2>
-            <p>Select a video, audio, or image stored on your device, choose its download filename, and save a copy. The file is handled locally in your browser — it is not uploaded to Fluxclip.</p>
-          </div>
-          <div className="local-download-controls">
-            <label className="file-picker-button" htmlFor="owned-media-file"><ArrowDownToLine size={16} /> Choose media file</label>
-            <input id="owned-media-file" className="visually-hidden-file-input" type="file" accept="video/*,audio/*,image/*" onChange={handleFileChange} />
-            {selectedFile && <>
-              <p className="selected-file-name" title={selectedFile.name}>{selectedFile.name} <span>({formatFileSize(selectedFile.size)})</span></p>
-              <label className="input-label" htmlFor="download-filename">Filename</label>
-              <input className="filename-input" id="download-filename" value={downloadName} maxLength={180} onChange={(event) => setDownloadName(event.target.value)} />
-              <button type="button" className="analyze-button" onClick={downloadSelectedFile}><ArrowDownToLine size={17} /> Download file</button>
-            </>}
-            {fileMessage && <p className={`file-message ${fileMessage.startsWith("Download started") ? "file-message-success" : ""}`} aria-live="polite">{fileMessage}</p>}
-            <p className="input-help">Max 500 MB · For files you own or are authorized to save.</p>
-          </div>
         </div>
       </section>
 
